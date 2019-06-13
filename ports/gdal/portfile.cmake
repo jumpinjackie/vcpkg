@@ -332,6 +332,40 @@ elseif (VCPKG_CMAKE_SYSTEM_NAME STREQUAL "Linux" OR VCPKG_CMAKE_SYSTEM_NAME STRE
       message(FATAL_ERROR "MAKE not found")
   endif()
 
+  # Setup extra configure args (Release)
+  list(APPEND GDAL_CONFIGURE_ARGS_REL
+    --with-png=${CURRENT_INSTALLED_DIR}
+    --with-proj=${CURRENT_INSTALLED_DIR}
+    #--with-openjpeg=${CURRENT_INSTALLED_DIR}
+    #--with-hdf5=${CURRENT_INSTALLED_DIR}
+    --with-libz=${CURRENT_INSTALLED_DIR}
+    --with-expat=${CURRENT_INSTALLED_DIR}
+    #--with-sqlite3=${CURRENT_INSTALLED_DIR}
+    #--with-curl=${CURRENT_INSTALLED_DIR}
+    #--with-xml2=${CURRENT_INSTALLED_DIR}
+    #--with-liblzma=${CURRENT_INSTALLED_DIR}
+    --with-webp=${CURRENT_INSTALLED_DIR}
+    #--with-pg=${CURRENT_INSTALLED_DIR}
+    #--with-geos=yes
+  )
+
+  # Setup extra configure args (Debug)
+  list(APPEND GDAL_CONFIGURE_ARGS_DBG
+    --with-png=${CURRENT_INSTALLED_DIR}/debug
+    --with-proj=${CURRENT_INSTALLED_DIR}/debug
+    #--with-openjpeg=${CURRENT_INSTALLED_DIR}
+    #--with-hdf5=${CURRENT_INSTALLED_DIR}
+    --with-libz=${CURRENT_INSTALLED_DIR}/debug
+    --with-expat=${CURRENT_INSTALLED_DIR}/debug
+    #--with-sqlite3=${CURRENT_INSTALLED_DIR}
+    #--with-curl=${CURRENT_INSTALLED_DIR}
+    #--with-xml2=${CURRENT_INSTALLED_DIR}
+    #--with-liblzma=${CURRENT_INSTALLED_DIR}
+    --with-webp=${CURRENT_INSTALLED_DIR}/debug
+    #--with-pg=${CURRENT_INSTALLED_DIR}
+    #--with-geos=yes
+  )
+
   if(NOT DEFINED VCPKG_BUILD_TYPE OR VCPKG_BUILD_TYPE STREQUAL "release")
     ################
     # Release build
@@ -340,7 +374,7 @@ elseif (VCPKG_CMAKE_SYSTEM_NAME STREQUAL "Linux" OR VCPKG_CMAKE_SYSTEM_NAME STRE
     set(OUT_PATH_RELEASE ${SOURCE_PATH_RELEASE}/../../make-build-${TARGET_TRIPLET}-release)
     file(MAKE_DIRECTORY ${OUT_PATH_RELEASE})
     vcpkg_execute_required_process(
-      COMMAND "${SOURCE_PATH_RELEASE}/configure" --prefix=${OUT_PATH_RELEASE}
+      COMMAND "${SOURCE_PATH_RELEASE}/configure" --prefix=${OUT_PATH_RELEASE} "${GDAL_CONFIGURE_ARGS_REL}"
       WORKING_DIRECTORY ${SOURCE_PATH_RELEASE}
       LOGNAME config-${TARGET_TRIPLET}-rel
     )
@@ -376,7 +410,7 @@ elseif (VCPKG_CMAKE_SYSTEM_NAME STREQUAL "Linux" OR VCPKG_CMAKE_SYSTEM_NAME STRE
     set(OUT_PATH_DEBUG ${SOURCE_PATH_RELEASE}/../../make-build-${TARGET_TRIPLET}-debug)
     file(MAKE_DIRECTORY ${OUT_PATH_DEBUG})
     vcpkg_execute_required_process(
-      COMMAND "${SOURCE_PATH_DEBUG}/configure" --prefix=${OUT_PATH_DEBUG}
+      COMMAND "${SOURCE_PATH_DEBUG}/configure" --prefix=${OUT_PATH_DEBUG} "${GDAL_CONFIGURE_ARGS_DBG}"
       WORKING_DIRECTORY ${SOURCE_PATH_DEBUG}
       LOGNAME config-${TARGET_TRIPLET}-debug
     )
