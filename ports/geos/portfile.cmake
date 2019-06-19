@@ -32,10 +32,22 @@ endif()
 
 file(REMOVE_RECURSE ${CURRENT_PACKAGES_DIR}/debug/include)
 
-if(EXISTS ${CURRENT_PACKAGES_DIR}/bin/geos-config)
-    file(MAKE_DIRECTORY ${CURRENT_PACKAGES_DIR}/share/geos)
-    file(RENAME ${CURRENT_PACKAGES_DIR}/bin/geos-config ${CURRENT_PACKAGES_DIR}/share/geos/geos-config)
-    file(REMOVE ${CURRENT_PACKAGES_DIR}/debug/bin/geos-config)
+if(CMAKE_HOST_UNIX OR CMAKE_HOST_APPLE)
+    # geos-config is unique per build type, so copy both
+    if(EXISTS ${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/tools/geos-config)
+        file(MAKE_DIRECTORY ${CURRENT_PACKAGES_DIR}/share/geos/rel)
+        file(COPY ${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/tools/geos-config 
+            DESTINATION ${CURRENT_PACKAGES_DIR}/share/geos/rel
+            FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+        )
+    endif ()
+    if(EXISTS ${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-dbg/tools/geos-config)
+    file(MAKE_DIRECTORY ${CURRENT_PACKAGES_DIR}/share/geos/dbg)
+        file(COPY ${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-dbg/tools/geos-config
+            DESTINATION ${CURRENT_PACKAGES_DIR}/share/geos/dbg
+            FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+        )
+    endif()
 endif()
 
 # Handle copyright
