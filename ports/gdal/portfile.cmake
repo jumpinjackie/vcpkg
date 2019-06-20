@@ -52,6 +52,11 @@ foreach(BUILD_TYPE IN LISTS BUILD_TYPES)
         PATCHES
         ${CMAKE_CURRENT_LIST_DIR}/0003-Fix-std-fabs.patch
     )
+    vcpkg_apply_patches(
+        SOURCE_PATH ${CURRENT_BUILDTREES_DIR}/src-${TARGET_TRIPLET}-${BUILD_TYPE}/gdal-${GDAL_VERSION_STR}
+        PATCHES
+        ${CMAKE_CURRENT_LIST_DIR}/0004-Fix-configure-lib-detection.patch
+    )
 endforeach()
 
 if (NOT VCPKG_CMAKE_SYSTEM_NAME OR VCPKG_CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
@@ -334,34 +339,38 @@ elseif (VCPKG_CMAKE_SYSTEM_NAME STREQUAL "Linux" OR VCPKG_CMAKE_SYSTEM_NAME STRE
 
   # Setup extra configure args (Release)
   list(APPEND GDAL_CONFIGURE_ARGS_REL
+    --with-local=${CURRENT_INSTALLED_DIR}
+    --with-geos=${CURRENT_INSTALLED_DIR}/share/geos/rel/geos-config
+    --with-sqlite3=${CURRENT_INSTALLED_DIR}
     --with-png=${CURRENT_INSTALLED_DIR}
     --with-proj=${CURRENT_INSTALLED_DIR}
-    #--with-openjpeg=${CURRENT_INSTALLED_DIR}
-    #--with-hdf5=${CURRENT_INSTALLED_DIR}
     --with-libz=${CURRENT_INSTALLED_DIR}
     --with-expat=${CURRENT_INSTALLED_DIR}
-    #--with-sqlite3=${CURRENT_INSTALLED_DIR}
+    --with-liblzma
+    #--with-openjpeg
+    #--with-hdf5=${CURRENT_INSTALLED_DIR}
     #--with-curl=${CURRENT_INSTALLED_DIR}
     #--with-xml2=${CURRENT_INSTALLED_DIR}
-    #--with-liblzma=${CURRENT_INSTALLED_DIR}
-    --with-webp=${CURRENT_INSTALLED_DIR}
     #--with-pg=${CURRENT_INSTALLED_DIR}
     #--with-geos=yes
   )
 
-  # Setup extra configure args (Debug)
+  # Setup extra configure args (Debug). NOTE: We rely on 
+  # ${CURRENT_INSTALLED_DIR}/debug/include being symlinked
+  # for all these switches to work
   list(APPEND GDAL_CONFIGURE_ARGS_DBG
+    --with-local=${CURRENT_INSTALLED_DIR}/debug
+    --with-geos=${CURRENT_INSTALLED_DIR}/share/geos/dbg/geos-config
+    --with-sqlite3=${CURRENT_INSTALLED_DIR}/debug
     --with-png=${CURRENT_INSTALLED_DIR}/debug
     --with-proj=${CURRENT_INSTALLED_DIR}/debug
-    #--with-openjpeg=${CURRENT_INSTALLED_DIR}
-    #--with-hdf5=${CURRENT_INSTALLED_DIR}
     --with-libz=${CURRENT_INSTALLED_DIR}/debug
     --with-expat=${CURRENT_INSTALLED_DIR}/debug
-    #--with-sqlite3=${CURRENT_INSTALLED_DIR}
+    --with-liblzma
+    #--with-openjpeg
+    #--with-hdf5=${CURRENT_INSTALLED_DIR}
     #--with-curl=${CURRENT_INSTALLED_DIR}
     #--with-xml2=${CURRENT_INSTALLED_DIR}
-    #--with-liblzma=${CURRENT_INSTALLED_DIR}
-    --with-webp=${CURRENT_INSTALLED_DIR}/debug
     #--with-pg=${CURRENT_INSTALLED_DIR}
     #--with-geos=yes
   )
@@ -424,7 +433,7 @@ elseif (VCPKG_CMAKE_SYSTEM_NAME STREQUAL "Linux" OR VCPKG_CMAKE_SYSTEM_NAME STRE
 
     message(STATUS "Installing ${TARGET_TRIPLET}-dbg")
     vcpkg_execute_required_process(
-      COMMAND make -j install
+      COMMAND make install
       WORKING_DIRECTORY ${SOURCE_PATH_DEBUG}
       LOGNAME make-install-${TARGET_TRIPLET}-debug
     )
